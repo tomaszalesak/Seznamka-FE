@@ -1,0 +1,13 @@
+{
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "yzhang.markdown-all-in-one",
+    "sburg.vscode-javascript-booster",
+    "eamodio.gitlens",
+    "dsznajder.es7-react-js-snippets",
+    "editorconfig.editorconfig",
+    "coenraads.bracket-pair-colorizer-2",
+    "mgmcdermott.vscode-language-babel"
+  ]
+}
