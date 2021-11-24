@@ -1,0 +1,15 @@
+name: Check with ESLint
+
+on: [push, pull_request]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install modules
+        run: yarn
+
+      # Runs a set of commands using the runners shell
+      - name: Run ESLint
+        run: yarn lint
