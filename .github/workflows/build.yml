@@ -1,0 +1,32 @@
+name: Build, lint, deploy
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install modules
+        run: yarn
+
+      - name: Run ESLint
+        run: yarn lint
+
+      - name: Build
+        run: yarn build
+
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_PV247_SEZNAMKA }}'
+          channelId: live
+          projectId: pv247-seznamka
+
