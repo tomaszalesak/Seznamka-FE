@@ -1,5 +1,6 @@
 import './App.css';
+import Register from './pages/Register';
 
-const App = () => <div>Ahoj.</div>;
+const App = () => <Register />;
 
 export default App;
