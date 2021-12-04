@@ -1,13 +1,8 @@
 import { Button, Paper, TextField, Typography } from '@mui/material';
 import { Box } from '@mui/system';
-import { FormEvent, useState } from 'react';
 
-const Login = () => {
-  const [isSignUp, setSignUp] = useState(false);
-
-  const [submitError, setSubmitError] = useState<string>();
-
-  return (
+const Login = () => (
+  <div>
     <Paper
       component="form"
       sx={{
@@ -32,12 +27,14 @@ const Login = () => {
           mt: 2
         }}
       >
-        {submitError && (
-          <Typography variant="caption" textAlign="right" sx={{ color: 'error.main' }}>
-            {submitError}
-          </Typography>
-        )}
-        <Button type="submit" variant="outlined" onClick={() => setSignUp(true)}>
+        <Typography variant="caption" textAlign="right" sx={{ color: 'error.main' }} />
+        <Button
+          type="submit"
+          variant="outlined"
+          onClick={() => {
+            true;
+          }}
+        >
           Sign Up
         </Button>
         <Button type="submit" variant="contained">
@@ -45,7 +42,7 @@ const Login = () => {
         </Button>
       </Box>
     </Paper>
-  );
-};
+  </div>
+);
 
 export default Login;
