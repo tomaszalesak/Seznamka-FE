@@ -10,12 +10,8 @@ import {
   FormLabel,
   Box,
   Slider,
-  InputLabel,
-  Select,
-  MenuItem,
-  SelectChangeEvent,
-  TextareaAutosize,
-  Checkbox
+  Checkbox,
+  Fab
 } from '@mui/material';
 import {
   Male,
@@ -23,25 +19,21 @@ import {
   Female,
   FemaleOutlined,
   Transgender,
-  TransgenderOutlined
+  TransgenderOutlined,
+  Add
 } from '@mui/icons-material';
 import { DesktopDatePicker, LocalizationProvider } from '@mui/lab';
 import DateAdapter from '@mui/lab/AdapterDateFns';
-import { ChangeEvent, ChangeEventHandler, FormEvent, useRef, useState } from 'react';
+import { useState } from 'react';
 
 const Register = () => {
-  const [isSignUp, setSignUp] = useState(false);
-
-  const [submitError, setSubmitError] = useState<string>();
-
   const [value, setValue] = useState<string | null>();
   const [heightVal, setHeightVal] = useState<number[]>();
   const [weightVal, setWeightVal] = useState<number[]>();
   const [ageVal, setAgeVal] = useState<number[]>();
   const [gpsVal, setGpsVal] = useState<number>();
-  const [gender, setGender] = useState('');
 
-  const handleChange = (newValue: string | null, keyboardInputValue?: string | undefined) => {
+  const handleChange = (newValue: string | null) => {
     setValue(newValue);
   };
 
@@ -123,23 +115,26 @@ const Register = () => {
           onChange={handleChange}
         />
         <TextField label="Bio" multiline minRows={3} />
+        <FormLabel component="legend">Gender</FormLabel>
         <Box
           sx={{
             display: 'flex',
             flexDirection: 'row',
             minWidth: '97%',
             p: 4,
-            gap: 2
+            gap: 2,
+            paddingTop: 0,
+            marginTop: '-2%'
           }}
         >
-          <FormLabel component="legend">Gender</FormLabel>
           <RadioGroup
             aria-label="gender"
             defaultValue="female"
             name="radio-buttons-group"
             sx={{
               display: 'flex',
-              flexDirection: 'row'
+              flexDirection: 'row',
+              minWidth: '40%'
             }}
           >
             <FormControlLabel value="female" control={<Radio />} label="Female" />
@@ -149,6 +144,10 @@ const Register = () => {
           <TextField label="Height (cm)" type="number" />
           <TextField label="Weight (kg)" type="number" />
         </Box>
+        <FormLabel component="legend">Photos</FormLabel>
+        <Fab color="primary" aria-label="add">
+          <Add />
+        </Fab>
 
         <Divider />
         <Typography variant="h6" component="h6" textAlign="left" mb={3}>
@@ -160,7 +159,9 @@ const Register = () => {
             flexDirection: 'column',
             minWidth: '97%',
             p: 4,
-            gap: 2
+            gap: 2,
+            paddingTop: 0,
+            marginTop: '-2%'
           }}
         >
           <FormLabel component="legend">Gender</FormLabel>
@@ -175,7 +176,7 @@ const Register = () => {
             <Checkbox icon={<Transgender />} checkedIcon={<TransgenderOutlined />} />
           </Box>
           <FormLabel component="legend">Age</FormLabel>
-          <Box sx={{ width: '20%' }}>
+          <Box sx={{ width: '30%' }}>
             <Slider
               aria-label="Always visible"
               value={ageVal}
@@ -188,8 +189,22 @@ const Register = () => {
               max={99}
             />
           </Box>
+          <FormLabel component="legend">GPS Radius</FormLabel>
+          <Box sx={{ width: '30%' }}>
+            <Slider
+              aria-label="Always visible"
+              value={gpsVal}
+              defaultValue={5}
+              getAriaValueText={valuetext}
+              step={1}
+              marks={marksg}
+              valueLabelDisplay="auto"
+              min={1}
+              max={100}
+            />
+          </Box>
           <FormLabel component="legend">Height</FormLabel>
-          <Box sx={{ width: '20%' }}>
+          <Box sx={{ width: '30%' }}>
             <Slider
               aria-label="Always visible"
               value={heightVal}
@@ -203,7 +218,7 @@ const Register = () => {
             />
           </Box>
           <FormLabel component="legend">Weight</FormLabel>
-          <Box sx={{ width: '20%' }}>
+          <Box sx={{ width: '30%' }}>
             <Slider
               aria-label="Always visible"
               value={weightVal}
@@ -214,20 +229,6 @@ const Register = () => {
               valueLabelDisplay="auto"
               min={30}
               max={200}
-            />
-          </Box>
-          <FormLabel component="legend">GPS Radius</FormLabel>
-          <Box sx={{ width: '20%' }}>
-            <Slider
-              aria-label="Always visible"
-              value={gpsVal}
-              defaultValue={5}
-              getAriaValueText={valuetext}
-              step={1}
-              marks={marksg}
-              valueLabelDisplay="auto"
-              min={1}
-              max={100}
             />
           </Box>
         </Box>
@@ -241,11 +242,6 @@ const Register = () => {
             mt: 2
           }}
         >
-          {submitError && (
-            <Typography variant="caption" textAlign="right" sx={{ color: 'error.main' }}>
-              {submitError}
-            </Typography>
-          )}
           <Button type="submit" variant="contained">
             Register
           </Button>
