@@ -15,6 +15,9 @@ import {
 import MenuIcon from '@mui/icons-material/Menu';
 import { AccountCircle } from '@mui/icons-material';
 
+import { useUser } from '../hooks/useLoggedInUser';
+import { signOut } from '../utils/firebase';
+
 const notLoginPages = [{ name: 'Home', link: '/' }];
 const loginPages = [
   { name: 'Home', link: '/' },
@@ -24,7 +27,7 @@ const loginPages = [
 //const loginSettings = [{ name: 'Profile', link: '/profile' }, 'Sign out'];
 
 const Layout: FC = ({ children }) => {
-  const [auth, setAuth] = useState(true);
+  const user = useUser();
   const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
   const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
 
@@ -86,7 +89,7 @@ const Layout: FC = ({ children }) => {
                   display: { xs: 'block', md: 'none' }
                 }}
               >
-                {auth
+                {user
                   ? loginPages.map(page => (
                       <MenuItem
                         component={Link}
@@ -118,7 +121,7 @@ const Layout: FC = ({ children }) => {
               Dating
             </Typography>
             <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-              {auth
+              {user
                 ? loginPages.map(page => (
                     <Button
                       component={Link}
@@ -143,7 +146,7 @@ const Layout: FC = ({ children }) => {
                   ))}
             </Box>
 
-            {auth ? (
+            {user ? (
               <Box sx={{ flexGrow: 0 }}>
                 <Tooltip title="Open settings">
                   <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
@@ -174,7 +177,14 @@ const Layout: FC = ({ children }) => {
                   >
                     <Typography textAlign="center">Profile</Typography>
                   </MenuItem>
-                  <MenuItem component={Button} key="Sign out" onClick={handleCloseNavMenu}>
+                  <MenuItem
+                    component={Button}
+                    key="Sign out"
+                    onClick={() => {
+                      handleCloseNavMenu();
+                      signOut();
+                    }}
+                  >
                     <Typography textAlign="center">Sign out</Typography>
                   </MenuItem>
                 </Menu>
