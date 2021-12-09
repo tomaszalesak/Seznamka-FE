@@ -17,14 +17,12 @@ import {
 
 // Initialize Firebase
 initializeApp({
-  apiKey: 'AIzaSyCpBQfHKYALAKU_8Yp9cWuvL_gR9TnnJ80',
-  authDomain: 'seznamka-a12c8.firebaseapp.com',
-  projectId: 'seznamka-a12c8',
-  storageBucket: 'seznamka-a12c8.appspot.com',
-  messagingSenderId: '258879444758',
-  appId: '1:258879444758:web:7e35ee89f49831d71f6237',
-  // eslint-disable-next-line no-template-curly-in-string
-  measurementId: '${config.measurementId}'
+  apiKey: 'AIzaSyBy4ZyghoTmA64Ml1b6iwmwoXPj19n7nZg',
+  authDomain: 'pv247-seznamka.firebaseapp.com',
+  projectId: 'pv247-seznamka',
+  storageBucket: 'pv247-seznamka.appspot.com',
+  messagingSenderId: '615016461999',
+  appId: '1:615016461999:web:d33d892bc792eb5b12065a'
 });
 
 // Authentication
