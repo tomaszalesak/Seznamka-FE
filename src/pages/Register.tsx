@@ -41,29 +41,48 @@ const Register = () => {
   const [bio, bioProps] = useField('bio', true);
   const [height, heightProps] = useField('height', true);
   const [weight, weightProps] = useField('weight', true);
-
-  const [birth, setBirth] = useState<string | null>();
+  const [birth, setBirth] = useState<string>(
+    new Date().toJSON().slice(0, 10).split('-').reverse().join('.')
+  );
   const [gender, setGender] = useState('female');
 
-  const [preferGender, setPreferGender] = useState(['female']);
+  const [preferGender] = useState(['female']);
 
-  const [heightVal, setHeightVal] = useState<number[]>();
-  const [weightVal, setWeightVal] = useState<number[]>();
-  const [ageVal, setAgeVal] = useState<number[]>();
-  const [gpsVal, setGpsVal] = useState<number>();
+  const [heightVal, setHeightVal] = useState<number[]>([150, 175]);
+  const [weightVal, setWeightVal] = useState<number[]>([50, 70]);
+  const [ageVal, setAgeVal] = useState<number[]>([15, 99]);
+  const [gpsVal, setGpsVal] = useState<number>(5);
 
   const [submitError, setSubmitError] = useState<string>();
 
   const handleBirth = (newBirth: string | null) => {
-    setBirth(newBirth);
+    if (newBirth !== null) {
+      setBirth(newBirth);
+    }
   };
   const handleGender = (event: ChangeEvent<HTMLInputElement>) => {
     setGender((event.target as HTMLInputElement).value);
   };
 
-  const handlePreferGender = (event: ChangeEvent<HTMLInputElement>) => {
-    setPreferGender((event.target as HTMLInputElement).value);
+  const handleHeight = (_event: Event, newValue: number | number[]) => {
+    setHeightVal(newValue as number[]);
   };
+
+  const handleWeight = (_event: Event, newValue: number | number[]) => {
+    setWeightVal(newValue as number[]);
+  };
+
+  const handleAge = (_event: Event, newValue: number | number[]) => {
+    setAgeVal(newValue as number[]);
+  };
+
+  const handleGps = (_event: Event, newValue: number | number[]) => {
+    setGpsVal(newValue as number);
+  };
+
+  // const handlePreferGender = (event: ChangeEvent<HTMLInputElement>) => {
+  //   setPreferGender((event.target as HTMLInputElement).value);
+  // };
 
   const marksh = [
     {
@@ -119,23 +138,28 @@ const Register = () => {
           e.preventDefault();
           try {
             await signUp(email, password);
-            await setDoc(usersDocument(email),{
-              firstname,
-              lastname,
-              birth: birth || "",
+            await setDoc(usersDocument(email), {
+              first_name: firstname,
+              last_name: lastname,
+              birth,
               bio,
               gender,
               height: +height,
               weight: +weight,
-              photos: ["zatim nic"],
+              photos: ['zatim nic'],
               preferences: {
-                gender,
-                age,
-                gps_radius,
-                height,
-                weight
-              };
-            })
+                gender: preferGender,
+                min_age: ageVal[0],
+                max_age: ageVal[1] as number,
+                gps_radius: gpsVal,
+                min_height: heightVal[0],
+                max_height: heightVal[1],
+                min_weight: weightVal[0],
+                max_weight: weightVal[1]
+              }
+              //follow: [],
+              //blocked: []
+            });
             navigate('/');
           } catch (err) {
             setSubmitError((err as { message?: string })?.message ?? 'Unknown error occurred');
@@ -236,7 +260,7 @@ const Register = () => {
             <Slider
               aria-label="Always visible"
               value={ageVal}
-              defaultValue={[15, 99]}
+              onChange={handleAge}
               getAriaValueText={valuetext}
               step={1}
               marks={marksa}
@@ -250,7 +274,7 @@ const Register = () => {
             <Slider
               aria-label="Always visible"
               value={gpsVal}
-              defaultValue={5}
+              onChange={handleGps}
               getAriaValueText={valuetext}
               step={1}
               marks={marksg}
@@ -264,7 +288,7 @@ const Register = () => {
             <Slider
               aria-label="Always visible"
               value={heightVal}
-              defaultValue={[150, 175]}
+              onChange={handleHeight}
               getAriaValueText={valuetext}
               step={1}
               marks={marksh}
@@ -278,7 +302,7 @@ const Register = () => {
             <Slider
               aria-label="Always visible"
               value={weightVal}
-              defaultValue={[50, 70]}
+              onChange={handleWeight}
               getAriaValueText={valuetext}
               step={1}
               marks={marksw}

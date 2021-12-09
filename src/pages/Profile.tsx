@@ -9,6 +9,12 @@ import {
   ImageList,
   ImageListItem
 } from '@mui/material';
+import { useParams } from 'react-router-dom';
+import { getDoc, setDoc } from 'firebase/firestore';
+import { useEffect, useState } from 'react';
+
+import { useUser } from '../hooks/useLoggedInUser';
+import { User, userBlockedDocument, userFollowDocument, usersDocument } from '../utils/firebase';
 
 const itemData = [
   {
@@ -61,54 +67,141 @@ const itemData = [
   }
 ];
 
-const Profile = () => (
-  <Grid container spacing={4}>
-    <Grid item xs={12} sm={6} md={4}>
-      <Card>
-        <CardActions>
-          <Button size="small">Follow</Button>
-          <Button size="small">Block</Button>
-          <Button size="small">Chat</Button>
-          <Button size="small">Change</Button>
-        </CardActions>
-        <CardMedia component="img" image="https://source.unsplash.com/random" alt="random" />
-        <CardContent>
-          <Typography gutterBottom variant="h5" component="div">
-            Name
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Lizards are a widespread group of squamate reptiles, with over 6,000 species, ranging
-            across all continents except Antarctica
-          </Typography>
-        </CardContent>
-      </Card>
-    </Grid>
+const Profile = () => {
+  const { profileId } = useParams();
+  const user = useUser();
 
-    <Grid item xs={12} sm={6} md={8}>
-      <Typography gutterBottom variant="h3" component="div">
-        Bio
-      </Typography>
-      <Typography>
-        Lizards are a widespread group of squamate reptiles, with over 6,000 species, ranging across
-        all continents except Antarctica
-      </Typography>
-      <Typography gutterBottom variant="h3" component="div">
-        Photo Feed
-      </Typography>
-      <ImageList variant="masonry" cols={3} gap={8}>
-        {itemData.map(item => (
-          <ImageListItem key={item.img}>
-            <img
-              src={`${item.img}?w=248&fit=crop&auto=format`}
-              srcSet={`${item.img}?w=248&fit=crop&auto=format&dpr=2 2x`}
-              alt={item.title}
-              loading="lazy"
-            />
-          </ImageListItem>
-        ))}
-      </ImageList>
+  const [profile, setProfile] = useState<User>();
+  const [blocked, setBlocked] = useState<boolean>();
+  const [follow, setFollow] = useState<boolean>();
+
+  useEffect(() => {
+    (async () => {
+      if (profileId && user?.email) {
+        const followDoc = await getDoc(userFollowDocument(user?.email, profileId));
+        const blockedDoc = await getDoc(userBlockedDocument(user?.email, profileId));
+        if (followDoc.exists()) {
+          setFollow(true);
+        } else if (blockedDoc.exists()) {
+          setBlocked(true);
+        }
+      }
+      if (profileId || user?.email) {
+        let userDoc;
+        if (user?.email) {
+          userDoc = usersDocument(user.email);
+        } else if (profileId) {
+          userDoc = usersDocument(profileId);
+        } else {
+          return;
+        }
+        userDoc = await getDoc(userDoc);
+        if (userDoc.exists()) {
+          setProfile(userDoc.data());
+        } else {
+          console.log('No such document!');
+        }
+      }
+    })();
+  }, [user, profileId]);
+
+  const followHandler = async () => {
+    if (user?.email && profileId) {
+      await setDoc(userFollowDocument(user?.email, profileId), {
+        email: profileId,
+        first_name: profile?.first_name,
+        last_name: profile?.last_name
+      });
+      setFollow(true);
+    }
+  };
+
+  const blockHandler = async () => {
+    if (user?.email && profileId) {
+      await setDoc(userBlockedDocument(user?.email, profileId), {
+        email: profileId,
+        first_name: profile?.first_name,
+        last_name: profile?.last_name
+      });
+      setBlocked(true);
+    }
+  };
+
+  return (
+    <Grid container spacing={4}>
+      <Grid item xs={12} sm={6} md={4}>
+        <Card>
+          <CardActions>
+            {profileId ? (
+              <>
+                {!follow ? (
+                  <Button size="small" onClick={followHandler}>
+                    Follow
+                  </Button>
+                ) : (
+                  ''
+                )}
+                {!blocked ? (
+                  <Button size="small" onClick={blockHandler}>
+                    Block
+                  </Button>
+                ) : (
+                  ''
+                )}
+                <Button size="small">Chat</Button>
+              </>
+            ) : (
+              ''
+            )}
+          </CardActions>
+          <CardMedia component="img" image="https://source.unsplash.com/random" alt="random" />
+          <CardContent>
+            <Typography gutterBottom variant="h5" component="div">
+              {profile ? `${profile?.first_name} ${profile?.last_name}` : ''}
+            </Typography>
+            <Typography>BIRTH</Typography>
+            <Typography sx={{ ml: 1, mb: 2 }} variant="body2" color="text.secondary">
+              {profile ? `${profile?.birth}` : ''}
+            </Typography>
+            <Typography>GENDER</Typography>
+            <Typography sx={{ ml: 1, mb: 2 }} variant="body2" color="text.secondary">
+              {profile ? `${profile?.gender}` : ''}
+            </Typography>
+            <Typography>HEIGHT</Typography>
+            <Typography sx={{ ml: 1, mb: 2 }} variant="body2" color="text.secondary">
+              {profile ? `${profile?.height}` : ''}
+            </Typography>
+            <Typography>WEIGHT</Typography>
+            <Typography sx={{ ml: 1, mb: 2 }} variant="body2" color="text.secondary">
+              {profile ? `${profile?.weight}` : ''}
+            </Typography>
+          </CardContent>
+        </Card>
+      </Grid>
+
+      <Grid item xs={12} sm={6} md={8}>
+        <Typography gutterBottom variant="h3" component="div">
+          Bio
+        </Typography>
+        <Typography>{profile?.bio}</Typography>
+        <Typography gutterBottom variant="h3" component="div">
+          Photo Feed
+        </Typography>
+        <ImageList variant="masonry" cols={3} gap={8}>
+          {itemData.map(item => (
+            <ImageListItem key={item.img}>
+              <img
+                src={`${item.img}?w=248&fit=crop&auto=format`}
+                srcSet={`${item.img}?w=248&fit=crop&auto=format&dpr=2 2x`}
+                alt={item.title}
+                loading="lazy"
+              />
+            </ImageListItem>
+          ))}
+        </ImageList>
+      </Grid>
     </Grid>
-  </Grid>
-);
+  );
+};
 
 export default Profile;

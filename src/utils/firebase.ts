@@ -12,8 +12,7 @@ import {
   CollectionReference,
   doc,
   DocumentReference,
-  getFirestore,
-  Timestamp
+  getFirestore
 } from 'firebase/firestore';
 
 // Initialize Firebase
@@ -58,28 +57,39 @@ export type User = {
   gender: string;
   height: number;
   weight: number;
-  photos: [string];
+  photos: string[];
   preferences: {
-    gender: string;
-    age: string;
-    gps_radius: string;
-    height: number;
-    weight: number;
+    gender: string[];
+    min_age: number;
+    max_age: number;
+    gps_radius: number;
+    min_height: number;
+    max_height: number;
+    min_weight: number;
+    max_weight: number;
   };
+  //follow: string[];
+  //blocked: string[];
+};
+
+export type Follow = {
+  email: string;
+  first_name: string;
+  last_name: string;
+};
+
+export type Blocked = {
+  email: string;
+  first_name: string;
+  last_name: string;
 };
 
 export const usersCollection = collection(db, 'users') as CollectionReference<User>;
 
 export const usersDocument = (id: string) => doc(db, 'users', id) as DocumentReference<User>;
 
-// Matches collection
-// export type Match = {
-// 	by: string;
-// 	winner: Winner;
-// 	date: Timestamp;
-// };
+export const userFollowDocument = (idUser: string, idFollow: string) =>
+  doc(db, 'users', idUser, 'follow', idFollow) as DocumentReference<Follow>;
 
-// export const matchesCollection = collection(
-// 	db,
-// 	'matches'
-// ) as CollectionReference<Match>;
+export const userBlockedDocument = (idUser: string, idFollow: string) =>
+  doc(db, 'users', idUser, 'blocked', idFollow) as DocumentReference<Blocked>;
