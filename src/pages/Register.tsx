@@ -41,9 +41,7 @@ const Register = () => {
   const [bio, bioProps] = useField('bio', true);
   const [height, heightProps] = useField('height', true);
   const [weight, weightProps] = useField('weight', true);
-  const [birth, setBirth] = useState<string>(
-    new Date().toJSON().slice(0, 10).split('-').reverse().join('.')
-  );
+  const [birth, setBirth] = useState(new Date());
   const [gender, setGender] = useState('female');
 
   const [preferGender] = useState(['female']);
@@ -55,7 +53,7 @@ const Register = () => {
 
   const [submitError, setSubmitError] = useState<string>();
 
-  const handleBirth = (newBirth: string | null) => {
+  const handleBirth = (newBirth: Date | null) => {
     if (newBirth !== null) {
       setBirth(newBirth);
     }
@@ -137,11 +135,10 @@ const Register = () => {
         onSubmit={async (e: FormEvent) => {
           e.preventDefault();
           try {
-            await signUp(email, password);
             await setDoc(usersDocument(email), {
               first_name: firstname,
               last_name: lastname,
-              birth,
+              birth: birth.toJSON().slice(0, 10).split('-').reverse().join('.'),
               bio,
               gender,
               height: +height,
@@ -160,6 +157,7 @@ const Register = () => {
               //follow: [],
               //blocked: []
             });
+            await signUp(email, password);
             navigate('/');
           } catch (err) {
             setSubmitError((err as { message?: string })?.message ?? 'Unknown error occurred');
