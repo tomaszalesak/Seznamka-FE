@@ -1,4 +1,4 @@
-name: Build, lint, deploy
+name: Deploy
 
 on:
   push:
