@@ -132,7 +132,6 @@ const Register = () => {
           e.preventDefault();
           try {
             const id = uuidv1();
-            await signUp(email, password);
             await setDoc(usersDocument(email), {
               first_name: firstname,
               last_name: lastname,
