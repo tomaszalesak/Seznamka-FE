@@ -10,8 +10,7 @@ import {
   FormLabel,
   Box,
   Slider,
-  Checkbox,
-  Fab
+  Checkbox
 } from '@mui/material';
 import {
   Male,
@@ -45,6 +44,9 @@ const Register = () => {
     new Date().toJSON().slice(0, 10).split('-').reverse().join('.')
   );
   const [gender, setGender] = useState('female');
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [picture, setPicture] = useState<File | null>();
+  const [imgData, setImgData] = useState<string | undefined>();
 
   const [preferGender] = useState(['female']);
 
@@ -63,6 +65,14 @@ const Register = () => {
   const handleGender = (event: ChangeEvent<HTMLInputElement>) => {
     setGender((event.target as HTMLInputElement).value);
   };
+  const handleUpload = (e: { target: { files: FileList | null } }) => {
+    if (e.target.files?.[0]) {
+      setPicture(e.target.files[0]);
+      const reader = new FileReader();
+      reader.addEventListener('load', () => setImgData(reader.result as string));
+      reader.readAsDataURL(e.target.files[0]);
+    }
+  };
 
   const handleHeight = (_event: Event, newValue: number | number[]) => {
     setHeightVal(newValue as number[]);
@@ -79,10 +89,6 @@ const Register = () => {
   const handleGps = (_event: Event, newValue: number | number[]) => {
     setGpsVal(newValue as number);
   };
-
-  // const handlePreferGender = (event: ChangeEvent<HTMLInputElement>) => {
-  //   setPreferGender((event.target as HTMLInputElement).value);
-  // };
 
   const marksh = [
     {
@@ -224,10 +230,31 @@ const Register = () => {
           <TextField label="Height (cm)" {...heightProps} type="number" />
           <TextField label="Weight (kg)" {...weightProps} type="number" />
         </Box>
-        <FormLabel component="legend">Photos</FormLabel>
-        <Fab color="primary" aria-label="add">
-          <Add />
-        </Fab>
+        <FormLabel component="legend">Profile photo</FormLabel>
+        <img
+          alt=""
+          className="playerProfilePic_home_tile"
+          src={imgData}
+          style={{ maxWidth: 100, height: 'auto' }}
+        />
+        {!imgData && (
+          <>
+            <input
+              accept="image/*"
+              className="input"
+              id="raised-button-file"
+              multiple
+              type="file"
+              style={{ display: 'none' }}
+              onChange={handleUpload}
+            />
+            <label htmlFor="raised-button-file">
+              <Button variant="contained" component="span" className="button">
+                <Add />
+              </Button>
+            </label>
+          </>
+        )}
 
         <Divider />
         <Typography variant="h6" component="h6" textAlign="left" mb={3}>

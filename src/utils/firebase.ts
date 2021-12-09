@@ -14,9 +14,10 @@ import {
   DocumentReference,
   getFirestore
 } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
 
 // Initialize Firebase
-initializeApp({
+const firebaseApp = initializeApp({
   apiKey: 'AIzaSyBy4ZyghoTmA64Ml1b6iwmwoXPj19n7nZg',
   authDomain: 'pv247-seznamka.firebaseapp.com',
   projectId: 'pv247-seznamka',
@@ -85,6 +86,8 @@ export type Blocked = {
 export const usersCollection = collection(db, 'users') as CollectionReference<User>;
 
 export const usersDocument = (id: string) => doc(db, 'users', id) as DocumentReference<User>;
+
+export const storage = getStorage(firebaseApp);
 
 export const userFollowDocument = (idUser: string, idFollow: string) =>
   doc(db, 'users', idUser, 'follow', idFollow) as DocumentReference<Follow>;
