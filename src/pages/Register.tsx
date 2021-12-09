@@ -10,8 +10,7 @@ import {
   FormLabel,
   Box,
   Slider,
-  Checkbox,
-  Fab
+  Checkbox
 } from '@mui/material';
 import {
   Male,
@@ -28,7 +27,7 @@ import { ChangeEvent, FormEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { setDoc } from 'firebase/firestore';
 
-import { signUp, usersDocument, storage } from '../utils/firebase';
+import { signUp, usersDocument } from '../utils/firebase';
 import useField from '../hooks/useField';
 
 const Register = () => {
@@ -44,6 +43,7 @@ const Register = () => {
 
   const [birth, setBirth] = useState<string | null>();
   const [gender, setGender] = useState('female');
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [picture, setPicture] = useState<File | null>();
   const [imgData, setImgData] = useState<string | undefined>();
 
