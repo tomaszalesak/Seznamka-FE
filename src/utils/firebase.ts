@@ -15,9 +15,10 @@ import {
   getFirestore,
   Timestamp
 } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
 
 // Initialize Firebase
-initializeApp({
+const firebaseApp = initializeApp({
   apiKey: 'AIzaSyCpBQfHKYALAKU_8Yp9cWuvL_gR9TnnJ80',
   authDomain: 'seznamka-a12c8.firebaseapp.com',
   projectId: 'seznamka-a12c8',
@@ -71,6 +72,8 @@ export type User = {
 export const usersCollection = collection(db, 'users') as CollectionReference<User>;
 
 export const usersDocument = (id: string) => doc(db, 'users', id) as DocumentReference<User>;
+
+export const storage = getStorage(firebaseApp);
 
 // Matches collection
 // export type Match = {
