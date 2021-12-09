@@ -12,21 +12,18 @@ import {
   CollectionReference,
   doc,
   DocumentReference,
-  getFirestore,
-  Timestamp
+  getFirestore
 } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
 // Initialize Firebase
 const firebaseApp = initializeApp({
-  apiKey: 'AIzaSyCpBQfHKYALAKU_8Yp9cWuvL_gR9TnnJ80',
-  authDomain: 'seznamka-a12c8.firebaseapp.com',
-  projectId: 'seznamka-a12c8',
-  storageBucket: 'seznamka-a12c8.appspot.com',
-  messagingSenderId: '258879444758',
-  appId: '1:258879444758:web:7e35ee89f49831d71f6237',
-  // eslint-disable-next-line no-template-curly-in-string
-  measurementId: '${config.measurementId}'
+  apiKey: 'AIzaSyBy4ZyghoTmA64Ml1b6iwmwoXPj19n7nZg',
+  authDomain: 'pv247-seznamka.firebaseapp.com',
+  projectId: 'pv247-seznamka',
+  storageBucket: 'pv247-seznamka.appspot.com',
+  messagingSenderId: '615016461999',
+  appId: '1:615016461999:web:d33d892bc792eb5b12065a'
 });
 
 // Authentication
@@ -59,14 +56,31 @@ export type User = {
   gender: string;
   height: number;
   weight: number;
-  photos: [string];
+  photos: string[];
   preferences: {
-    gender: string;
-    age: string;
-    gps_radius: string;
-    height: number;
-    weight: number;
+    gender: string[];
+    min_age: number;
+    max_age: number;
+    gps_radius: number;
+    min_height: number;
+    max_height: number;
+    min_weight: number;
+    max_weight: number;
   };
+  //follow: string[];
+  //blocked: string[];
+};
+
+export type Follow = {
+  email: string;
+  first_name: string;
+  last_name: string;
+};
+
+export type Blocked = {
+  email: string;
+  first_name: string;
+  last_name: string;
 };
 
 export const usersCollection = collection(db, 'users') as CollectionReference<User>;
@@ -75,14 +89,8 @@ export const usersDocument = (id: string) => doc(db, 'users', id) as DocumentRef
 
 export const storage = getStorage(firebaseApp);
 
-// Matches collection
-// export type Match = {
-// 	by: string;
-// 	winner: Winner;
-// 	date: Timestamp;
-// };
+export const userFollowDocument = (idUser: string, idFollow: string) =>
+  doc(db, 'users', idUser, 'follow', idFollow) as DocumentReference<Follow>;
 
-// export const matchesCollection = collection(
-// 	db,
-// 	'matches'
-// ) as CollectionReference<Match>;
+export const userBlockedDocument = (idUser: string, idFollow: string) =>
+  doc(db, 'users', idUser, 'blocked', idFollow) as DocumentReference<Blocked>;

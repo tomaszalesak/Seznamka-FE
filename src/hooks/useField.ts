@@ -1,6 +1,6 @@
 import { ChangeEvent, useCallback, useState } from 'react';
 
-const useField = (id: string, required?: boolean, number = false) => {
+const useField = (id: string, required?: boolean, _number = false) => {
   // let setValue: (arg0: string | number) => void;
   // let value;
 
