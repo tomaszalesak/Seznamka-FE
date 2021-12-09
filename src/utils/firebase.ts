@@ -45,7 +45,7 @@ export const onAuthChanged = (callback: (u: UserFirebase | null) => void) =>
   onAuthStateChanged(auth, callback);
 
 // Firestore
-const db = getFirestore();
+export const db = getFirestore();
 
 // user collection
 export type User = {
@@ -56,9 +56,8 @@ export type User = {
   gender: string;
   height: number;
   weight: number;
-  photos: string[];
+  photo: string;
   preferences: {
-    gender: string[];
     min_age: number;
     max_age: number;
     gps_radius: number;
