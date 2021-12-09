@@ -24,7 +24,6 @@ const loginPages = [
   { name: 'Find', link: '/find' },
   { name: 'Chats', link: '/chats' }
 ];
-//const loginSettings = [{ name: 'Profile', link: '/profile' }, 'Sign out'];
 
 const Layout: FC = ({ children }) => {
   const user = useUser();

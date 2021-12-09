@@ -79,19 +79,20 @@ const Profile = () => {
     (async () => {
       if (profileId && user?.email) {
         const followDoc = await getDoc(userFollowDocument(user?.email, profileId));
-        const blockedDoc = await getDoc(userBlockedDocument(user?.email, profileId));
+        const blockedDoc = await getDoc(userBlockedDocument(profileId, user?.email));
         if (followDoc.exists()) {
           setFollow(true);
-        } else if (blockedDoc.exists()) {
+        }
+        if (blockedDoc.exists()) {
           setBlocked(true);
         }
       }
       if (profileId || user?.email) {
         let userDoc;
-        if (user?.email) {
-          userDoc = usersDocument(user.email);
-        } else if (profileId) {
+        if (profileId) {
           userDoc = usersDocument(profileId);
+        } else if (user?.email) {
+          userDoc = usersDocument(user.email);
         } else {
           return;
         }
@@ -118,7 +119,7 @@ const Profile = () => {
 
   const blockHandler = async () => {
     if (user?.email && profileId) {
-      await setDoc(userBlockedDocument(user?.email, profileId), {
+      await setDoc(userBlockedDocument(profileId, user?.email), {
         email: profileId,
         first_name: profile?.first_name,
         last_name: profile?.last_name
