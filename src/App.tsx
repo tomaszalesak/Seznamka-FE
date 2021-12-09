@@ -5,16 +5,19 @@ import { CssBaseline, ThemeProvider } from '@mui/material';
 import theme from './utils/theme';
 import Layout from './components/Layout';
 import Routes from './components/Routes';
+import { UserProvider } from './hooks/useLoggedInUser';
 
 const App = () => (
-  <ThemeProvider theme={theme}>
-    <CssBaseline />
-    <BrowserRouter>
-      <Layout>
-        <Routes />
-      </Layout>
-    </BrowserRouter>
-  </ThemeProvider>
+  <UserProvider>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <BrowserRouter>
+        <Layout>
+          <Routes />
+        </Layout>
+      </BrowserRouter>
+    </ThemeProvider>
+  </UserProvider>
 );
 
 export default App;

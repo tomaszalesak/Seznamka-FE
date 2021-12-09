@@ -24,18 +24,65 @@ import {
 } from '@mui/icons-material';
 import { DesktopDatePicker, LocalizationProvider } from '@mui/lab';
 import DateAdapter from '@mui/lab/AdapterDateFns';
-import { useState } from 'react';
+import { ChangeEvent, FormEvent, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { setDoc } from 'firebase/firestore';
+
+import { signUp, usersDocument } from '../utils/firebase';
+import useField from '../hooks/useField';
 
 const Register = () => {
-  const [value, setValue] = useState<string | null>();
-  const [heightVal, setHeightVal] = useState<number[]>();
-  const [weightVal, setWeightVal] = useState<number[]>();
-  const [ageVal, setAgeVal] = useState<number[]>();
-  const [gpsVal, setGpsVal] = useState<number>();
+  const navigate = useNavigate();
 
-  const handleChange = (newValue: string | null) => {
-    setValue(newValue);
+  const [email, usernameProps] = useField('email', true);
+  const [password, passwordProps] = useField('password', true);
+  const [firstname, firstnameProps] = useField('firstname', true);
+  const [lastname, lastnameProps] = useField('lastname', true);
+  const [bio, bioProps] = useField('bio', true);
+  const [height, heightProps] = useField('height', true);
+  const [weight, weightProps] = useField('weight', true);
+  const [birth, setBirth] = useState<string>(
+    new Date().toJSON().slice(0, 10).split('-').reverse().join('.')
+  );
+  const [gender, setGender] = useState('female');
+
+  const [preferGender] = useState(['female']);
+
+  const [heightVal, setHeightVal] = useState<number[]>([150, 175]);
+  const [weightVal, setWeightVal] = useState<number[]>([50, 70]);
+  const [ageVal, setAgeVal] = useState<number[]>([15, 99]);
+  const [gpsVal, setGpsVal] = useState<number>(5);
+
+  const [submitError, setSubmitError] = useState<string>();
+
+  const handleBirth = (newBirth: string | null) => {
+    if (newBirth !== null) {
+      setBirth(newBirth);
+    }
   };
+  const handleGender = (event: ChangeEvent<HTMLInputElement>) => {
+    setGender((event.target as HTMLInputElement).value);
+  };
+
+  const handleHeight = (_event: Event, newValue: number | number[]) => {
+    setHeightVal(newValue as number[]);
+  };
+
+  const handleWeight = (_event: Event, newValue: number | number[]) => {
+    setWeightVal(newValue as number[]);
+  };
+
+  const handleAge = (_event: Event, newValue: number | number[]) => {
+    setAgeVal(newValue as number[]);
+  };
+
+  const handleGps = (_event: Event, newValue: number | number[]) => {
+    setGpsVal(newValue as number);
+  };
+
+  // const handlePreferGender = (event: ChangeEvent<HTMLInputElement>) => {
+  //   setPreferGender((event.target as HTMLInputElement).value);
+  // };
 
   const marksh = [
     {
@@ -87,6 +134,37 @@ const Register = () => {
     <LocalizationProvider dateAdapter={DateAdapter}>
       <Paper
         component="form"
+        onSubmit={async (e: FormEvent) => {
+          e.preventDefault();
+          try {
+            await signUp(email, password);
+            await setDoc(usersDocument(email), {
+              first_name: firstname,
+              last_name: lastname,
+              birth,
+              bio,
+              gender,
+              height: +height,
+              weight: +weight,
+              photos: ['zatim nic'],
+              preferences: {
+                gender: preferGender,
+                min_age: ageVal[0],
+                max_age: ageVal[1] as number,
+                gps_radius: gpsVal,
+                min_height: heightVal[0],
+                max_height: heightVal[1],
+                min_weight: weightVal[0],
+                max_weight: weightVal[1]
+              }
+              //follow: [],
+              //blocked: []
+            });
+            navigate('/');
+          } catch (err) {
+            setSubmitError((err as { message?: string })?.message ?? 'Unknown error occurred');
+          }
+        }}
         sx={{
           display: 'flex',
           flexDirection: 'column',
@@ -98,23 +176,23 @@ const Register = () => {
         <Typography variant="h4" component="h2" textAlign="center" mb={3}>
           Register
         </Typography>
-        <TextField label="Username" type="input" />
-        <TextField label="Password" type="password" />
+        <TextField label="Username" {...usernameProps} type="input" />
+        <TextField label="Password" {...passwordProps} type="password" />
         <TextField label="Confirm Password" type="password" />
         <Divider />
         <Typography variant="h6" component="h6" textAlign="left" mb={3}>
           Personal Info
         </Typography>
-        <TextField label="First Name" type="input" />
-        <TextField label="Last name" type="input" />
+        <TextField label="First Name" {...firstnameProps} type="input" />
+        <TextField label="Last name" {...lastnameProps} type="input" />
         <DesktopDatePicker
           label="Birth Date"
           inputFormat="dd.MM.yyyy"
-          value={value}
+          value={birth}
           renderInput={params => <TextField {...params} />}
-          onChange={handleChange}
+          onChange={handleBirth}
         />
-        <TextField label="Bio" multiline minRows={3} />
+        <TextField label="Bio" {...bioProps} multiline minRows={3} />
         <FormLabel component="legend">Gender</FormLabel>
         <Box
           sx={{
@@ -131,6 +209,8 @@ const Register = () => {
             aria-label="gender"
             defaultValue="female"
             name="radio-buttons-group"
+            value={gender}
+            onChange={handleGender}
             sx={{
               display: 'flex',
               flexDirection: 'row',
@@ -141,8 +221,8 @@ const Register = () => {
             <FormControlLabel value="male" control={<Radio />} label="Male" />
             <FormControlLabel value="other" control={<Radio />} label="Other" />
           </RadioGroup>
-          <TextField label="Height (cm)" type="number" />
-          <TextField label="Weight (kg)" type="number" />
+          <TextField label="Height (cm)" {...heightProps} type="number" />
+          <TextField label="Weight (kg)" {...weightProps} type="number" />
         </Box>
         <FormLabel component="legend">Photos</FormLabel>
         <Fab color="primary" aria-label="add">
@@ -180,7 +260,7 @@ const Register = () => {
             <Slider
               aria-label="Always visible"
               value={ageVal}
-              defaultValue={[15, 99]}
+              onChange={handleAge}
               getAriaValueText={valuetext}
               step={1}
               marks={marksa}
@@ -194,7 +274,7 @@ const Register = () => {
             <Slider
               aria-label="Always visible"
               value={gpsVal}
-              defaultValue={5}
+              onChange={handleGps}
               getAriaValueText={valuetext}
               step={1}
               marks={marksg}
@@ -208,7 +288,7 @@ const Register = () => {
             <Slider
               aria-label="Always visible"
               value={heightVal}
-              defaultValue={[150, 175]}
+              onChange={handleHeight}
               getAriaValueText={valuetext}
               step={1}
               marks={marksh}
@@ -222,7 +302,7 @@ const Register = () => {
             <Slider
               aria-label="Always visible"
               value={weightVal}
-              defaultValue={[50, 70]}
+              onChange={handleWeight}
               getAriaValueText={valuetext}
               step={1}
               marks={marksw}
@@ -232,7 +312,6 @@ const Register = () => {
             />
           </Box>
         </Box>
-
         <Box
           sx={{
             display: 'flex',
@@ -242,6 +321,11 @@ const Register = () => {
             mt: 2
           }}
         >
+          {submitError && (
+            <Typography variant="caption" textAlign="right" sx={{ color: 'error.main' }}>
+              {submitError}
+            </Typography>
+          )}
           <Button type="submit" variant="contained">
             Register
           </Button>

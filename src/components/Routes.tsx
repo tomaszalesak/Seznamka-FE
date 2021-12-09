@@ -10,11 +10,22 @@ import Register from '../pages/Register';
 const Routes = () => (
   <ReactRouters>
     <Route path="/" element={<Home />} />
-    <Route path="/profile" element={<Profile />} />
+    <Route path="/profile" element={<Profile />}>
+      <Route path=":profileId" element={<Profile />} />
+    </Route>
+
     <Route path="/find" element={<Find />} />
     <Route path="/chats" element={<Chats />} />
     <Route path="/login" element={<Login />} />
     <Route path="/register" element={<Register />} />
+    <Route
+      path="*"
+      element={
+        <main style={{ padding: '1rem' }}>
+          <p>There`s nothing here!</p>
+        </main>
+      }
+    />
     {/* !user && <Route path="/login" element={<Users />} /> */}
     {/* <Route element={<Users />} /> */}
   </ReactRouters>
