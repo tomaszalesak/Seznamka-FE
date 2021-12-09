@@ -1,9 +1,9 @@
 import { Grid, Chip } from '@mui/material';
-import { useState } from 'react';
+import { onSnapshot } from 'firebase/firestore';
+import { useEffect, useState } from 'react';
 
 import FindCard from '../components/FindCard';
-
-const cards = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+import { usersCollection, UserWithId } from '../utils/firebase';
 
 type ChipData = {
   key: number;
@@ -12,6 +12,20 @@ type ChipData = {
 };
 
 const Find = () => {
+  const [users, setUsers] = useState<UserWithId[]>([]);
+
+  useEffect(() => {
+    // Call onSnapshot() to listen to changes
+    const unsubscribe = onSnapshot(usersCollection, snapshot => {
+      // Access .docs property of snapshot
+      setUsers(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+    // Don't forget to unsubscribe from listening to changes
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
   const [chipData, setChipData] = useState<readonly ChipData[]>([
     { key: 0, label: 'Angular', used: true },
     { key: 1, label: 'jQuery', used: true },
@@ -60,10 +74,8 @@ const Find = () => {
       </Grid>
 
       <Grid container spacing={4}>
-        {cards.map(card => (
-          <Grid item key={card} xs={12} sm={6} md={4}>
-            <FindCard />
-          </Grid>
+        {users.map((user, index) => (
+          <FindCard key={index} {...user} />
         ))}
       </Grid>
     </>
