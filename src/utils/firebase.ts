@@ -14,9 +14,10 @@ import {
   DocumentReference,
   getFirestore
 } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
 
 // Initialize Firebase
-initializeApp({
+const firebaseApp = initializeApp({
   apiKey: 'AIzaSyBy4ZyghoTmA64Ml1b6iwmwoXPj19n7nZg',
   authDomain: 'pv247-seznamka.firebaseapp.com',
   projectId: 'pv247-seznamka',
@@ -44,7 +45,7 @@ export const onAuthChanged = (callback: (u: UserFirebase | null) => void) =>
   onAuthStateChanged(auth, callback);
 
 // Firestore
-const db = getFirestore();
+export const db = getFirestore();
 
 // user collection
 export type User = {
@@ -55,9 +56,8 @@ export type User = {
   gender: string;
   height: number;
   weight: number;
-  photos: string[];
+  photo: string;
   preferences: {
-    gender: string[];
     min_age: number;
     max_age: number;
     gps_radius: number;
@@ -85,6 +85,8 @@ export type Blocked = {
 export const usersCollection = collection(db, 'users') as CollectionReference<User>;
 
 export const usersDocument = (id: string) => doc(db, 'users', id) as DocumentReference<User>;
+
+export const storage = getStorage(firebaseApp);
 
 export const userFollowDocument = (idUser: string, idFollow: string) =>
   doc(db, 'users', idUser, 'follow', idFollow) as DocumentReference<Follow>;

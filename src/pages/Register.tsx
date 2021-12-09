@@ -9,26 +9,18 @@ import {
   FormControlLabel,
   FormLabel,
   Box,
-  Slider,
-  Checkbox,
-  Fab
+  Slider
 } from '@mui/material';
-import {
-  Male,
-  MaleOutlined,
-  Female,
-  FemaleOutlined,
-  Transgender,
-  TransgenderOutlined,
-  Add
-} from '@mui/icons-material';
+import { Add } from '@mui/icons-material';
 import { DesktopDatePicker, LocalizationProvider } from '@mui/lab';
 import DateAdapter from '@mui/lab/AdapterDateFns';
 import { ChangeEvent, FormEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { setDoc } from 'firebase/firestore';
+import { ref, uploadString } from 'firebase/storage';
+import { v1 as uuidv1 } from 'uuid';
 
-import { signUp, usersDocument } from '../utils/firebase';
+import { signUp, usersDocument, storage } from '../utils/firebase';
 import useField from '../hooks/useField';
 
 const Register = () => {
@@ -43,8 +35,8 @@ const Register = () => {
   const [weight, weightProps] = useField('weight', true);
   const [birth, setBirth] = useState(new Date());
   const [gender, setGender] = useState('female');
-
-  const [preferGender] = useState(['female']);
+  const [picture, setPicture] = useState<File | null>();
+  const [imgData, setImgData] = useState<string | undefined>();
 
   const [heightVal, setHeightVal] = useState<number[]>([150, 175]);
   const [weightVal, setWeightVal] = useState<number[]>([50, 70]);
@@ -60,6 +52,14 @@ const Register = () => {
   };
   const handleGender = (event: ChangeEvent<HTMLInputElement>) => {
     setGender((event.target as HTMLInputElement).value);
+  };
+  const handleUpload = (e: { target: { files: FileList | null } }) => {
+    if (e.target.files?.[0]) {
+      setPicture(e.target.files[0]);
+      const reader = new FileReader();
+      reader.addEventListener('load', () => setImgData(reader.result as string));
+      reader.readAsDataURL(e.target.files[0]);
+    }
   };
 
   const handleHeight = (_event: Event, newValue: number | number[]) => {
@@ -77,10 +77,6 @@ const Register = () => {
   const handleGps = (_event: Event, newValue: number | number[]) => {
     setGpsVal(newValue as number);
   };
-
-  // const handlePreferGender = (event: ChangeEvent<HTMLInputElement>) => {
-  //   setPreferGender((event.target as HTMLInputElement).value);
-  // };
 
   const marksh = [
     {
@@ -135,6 +131,8 @@ const Register = () => {
         onSubmit={async (e: FormEvent) => {
           e.preventDefault();
           try {
+            const id = uuidv1();
+            await signUp(email, password);
             await setDoc(usersDocument(email), {
               first_name: firstname,
               last_name: lastname,
@@ -143,9 +141,8 @@ const Register = () => {
               gender,
               height: +height,
               weight: +weight,
-              photos: ['zatim nic'],
+              photo: `${id}.jpg`,
               preferences: {
-                gender: preferGender,
                 min_age: ageVal[0],
                 max_age: ageVal[1] as number,
                 gps_radius: gpsVal,
@@ -157,6 +154,10 @@ const Register = () => {
               //follow: [],
               //blocked: []
             });
+            if (picture?.name) {
+              const storageRef = ref(storage, `images/${id}.jpg`);
+              await uploadString(storageRef, imgData as string, 'data_url');
+            }
             await signUp(email, password);
             navigate('/');
           } catch (err) {
@@ -176,7 +177,6 @@ const Register = () => {
         </Typography>
         <TextField label="Username" {...usernameProps} type="input" />
         <TextField label="Password" {...passwordProps} type="password" />
-        <TextField label="Confirm Password" type="password" />
         <Divider />
         <Typography variant="h6" component="h6" textAlign="left" mb={3}>
           Personal Info
@@ -222,10 +222,31 @@ const Register = () => {
           <TextField label="Height (cm)" {...heightProps} type="number" />
           <TextField label="Weight (kg)" {...weightProps} type="number" />
         </Box>
-        <FormLabel component="legend">Photos</FormLabel>
-        <Fab color="primary" aria-label="add">
-          <Add />
-        </Fab>
+        <FormLabel component="legend">Profile photo</FormLabel>
+        <img
+          alt=""
+          className="playerProfilePic_home_tile"
+          src={imgData}
+          style={{ maxWidth: 100, height: 'auto' }}
+        />
+        {!imgData && (
+          <>
+            <input
+              accept="image/*"
+              className="input"
+              id="raised-button-file"
+              multiple
+              type="file"
+              style={{ display: 'none' }}
+              onChange={handleUpload}
+            />
+            <label htmlFor="raised-button-file">
+              <Button variant="contained" component="span" className="button">
+                <Add />
+              </Button>
+            </label>
+          </>
+        )}
 
         <Divider />
         <Typography variant="h6" component="h6" textAlign="left" mb={3}>
@@ -242,17 +263,6 @@ const Register = () => {
             marginTop: '-2%'
           }}
         >
-          <FormLabel component="legend">Gender</FormLabel>
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'row'
-            }}
-          >
-            <Checkbox icon={<Female />} checkedIcon={<FemaleOutlined />} />
-            <Checkbox icon={<Male />} checkedIcon={<MaleOutlined />} />
-            <Checkbox icon={<Transgender />} checkedIcon={<TransgenderOutlined />} />
-          </Box>
           <FormLabel component="legend">Age</FormLabel>
           <Box sx={{ width: '30%' }}>
             <Slider
