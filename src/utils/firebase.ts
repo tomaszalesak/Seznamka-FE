@@ -70,6 +70,8 @@ export type User = {
   //blocked: string[];
 };
 
+export type UserWithId = User & { id: string };
+
 export type Follow = {
   email: string;
   first_name: string;
