@@ -9,25 +9,18 @@ import {
   FormControlLabel,
   FormLabel,
   Box,
-  Slider,
-  Checkbox
+  Slider
 } from '@mui/material';
-import {
-  Male,
-  MaleOutlined,
-  Female,
-  FemaleOutlined,
-  Transgender,
-  TransgenderOutlined,
-  Add
-} from '@mui/icons-material';
+import { Add } from '@mui/icons-material';
 import { DesktopDatePicker, LocalizationProvider } from '@mui/lab';
 import DateAdapter from '@mui/lab/AdapterDateFns';
 import { ChangeEvent, FormEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { setDoc } from 'firebase/firestore';
+import { ref, uploadString } from 'firebase/storage';
+import { v1 as uuidv1 } from 'uuid';
 
-import { signUp, usersDocument } from '../utils/firebase';
+import { signUp, usersDocument, storage } from '../utils/firebase';
 import useField from '../hooks/useField';
 
 const Register = () => {
@@ -40,15 +33,10 @@ const Register = () => {
   const [bio, bioProps] = useField('bio', true);
   const [height, heightProps] = useField('height', true);
   const [weight, weightProps] = useField('weight', true);
-  const [birth, setBirth] = useState<string>(
-    new Date().toJSON().slice(0, 10).split('-').reverse().join('.')
-  );
+  const [birth, setBirth] = useState(new Date());
   const [gender, setGender] = useState('female');
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [picture, setPicture] = useState<File | null>();
   const [imgData, setImgData] = useState<string | undefined>();
-
-  const [preferGender] = useState(['female']);
 
   const [heightVal, setHeightVal] = useState<number[]>([150, 175]);
   const [weightVal, setWeightVal] = useState<number[]>([50, 70]);
@@ -57,7 +45,7 @@ const Register = () => {
 
   const [submitError, setSubmitError] = useState<string>();
 
-  const handleBirth = (newBirth: string | null) => {
+  const handleBirth = (newBirth: Date | null) => {
     if (newBirth !== null) {
       setBirth(newBirth);
     }
@@ -143,18 +131,17 @@ const Register = () => {
         onSubmit={async (e: FormEvent) => {
           e.preventDefault();
           try {
-            await signUp(email, password);
+            const id = uuidv1();
             await setDoc(usersDocument(email), {
               first_name: firstname,
               last_name: lastname,
-              birth,
+              birth: birth.toJSON().slice(0, 10).split('-').reverse().join('.'),
               bio,
               gender,
               height: +height,
               weight: +weight,
-              photos: ['zatim nic'],
+              photo: `${id}.jpg`,
               preferences: {
-                gender: preferGender,
                 min_age: ageVal[0],
                 max_age: ageVal[1] as number,
                 gps_radius: gpsVal,
@@ -166,6 +153,11 @@ const Register = () => {
               //follow: [],
               //blocked: []
             });
+            if (picture?.name) {
+              const storageRef = ref(storage, `images/${id}.jpg`);
+              await uploadString(storageRef, imgData as string, 'data_url');
+            }
+            await signUp(email, password);
             navigate('/');
           } catch (err) {
             setSubmitError((err as { message?: string })?.message ?? 'Unknown error occurred');
@@ -184,7 +176,6 @@ const Register = () => {
         </Typography>
         <TextField label="Username" {...usernameProps} type="input" />
         <TextField label="Password" {...passwordProps} type="password" />
-        <TextField label="Confirm Password" type="password" />
         <Divider />
         <Typography variant="h6" component="h6" textAlign="left" mb={3}>
           Personal Info
@@ -271,17 +262,6 @@ const Register = () => {
             marginTop: '-2%'
           }}
         >
-          <FormLabel component="legend">Gender</FormLabel>
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'row'
-            }}
-          >
-            <Checkbox icon={<Female />} checkedIcon={<FemaleOutlined />} />
-            <Checkbox icon={<Male />} checkedIcon={<MaleOutlined />} />
-            <Checkbox icon={<Transgender />} checkedIcon={<TransgenderOutlined />} />
-          </Box>
           <FormLabel component="legend">Age</FormLabel>
           <Box sx={{ width: '30%' }}>
             <Slider
