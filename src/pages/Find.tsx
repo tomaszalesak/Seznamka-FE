@@ -12,11 +12,42 @@ type ChipData = {
   used: boolean;
 };
 
+/*type Preferences = {
+  minAge: number;
+  maxAge: number;
+  minRad: number;
+  maxRad: number;
+  minHeight: number;
+  maxHeight: number;
+  minWeight: number;
+  maxWeight: number;
+};*/
+
 const Find = () => {
   const loggedInUser = useUser();
   const [users, setUsers] = useState<UserWithId[]>([]);
   const [profile, setProfile] = useState<User>();
   const user = useUser();
+
+  const [chipData, setChipData] = useState<readonly ChipData[]>([
+    { key: 0, label: 'Age', used: false },
+    { key: 1, label: 'Height', used: false },
+    { key: 2, label: 'Weight', used: false },
+    { key: 3, label: 'GPS radius', used: false }
+  ]);
+
+  const ageFromDateOfBirthday = (dateOfBirth: string) => {
+    const today = new Date();
+    const birthDate = dateOfBirth.split('.');
+    let age = today.getFullYear() - (birthDate?.[2] as unknown as number);
+    const m = today.getMonth() - (birthDate?.[1] as unknown as number);
+
+    if (m < 0 || (m === 0 && today.getDate() < (birthDate?.[0] as unknown as number))) {
+      age--;
+    }
+
+    return age;
+  };
 
   useEffect(() => {
     (async () => {
@@ -44,12 +75,48 @@ const Find = () => {
     };
   }, [loggedInUser]);
 
-  const [chipData, setChipData] = useState<readonly ChipData[]>([
-    { key: 0, label: 'Age', used: false },
-    { key: 1, label: 'Height', used: false },
-    { key: 2, label: 'Weight', used: false },
-    { key: 3, label: 'GPS radius', used: false }
-  ]);
+  useEffect(() => {
+    if (profile?.preferences) {
+      const unsubscribe = onSnapshot(usersCollection, snapshot => {
+        setUsers(
+          snapshot.docs
+            .filter(doc => doc.id !== loggedInUser?.email)
+            .map(doc => ({ id: doc.id, ...doc.data() }))
+        );
+        if (chipData[0].used === true) {
+          setUsers(
+            users
+              .filter(user => profile.preferences.min_age <= ageFromDateOfBirthday(user.birth))
+              .filter(user => profile.preferences.max_age >= ageFromDateOfBirthday(user.birth))
+          );
+        }
+        if (chipData[1].used === true) {
+          setUsers(
+            users
+              .filter(user => profile.preferences.min_height <= user.height)
+              .filter(user => profile.preferences.max_height >= user.height)
+          );
+        }
+        if (chipData[2].used === true) {
+          setUsers(
+            users
+              .filter(user => profile.preferences.min_weight <= user.weight)
+              .filter(user => profile.preferences.max_weight >= user.weight)
+          );
+        }
+        /*if (chipData[3].used === true) {
+          setUsers(
+            users
+              .filter(user => profile.preferences.gps_radius >= 0)
+              .filter(user => profile.preferences.gps_radius <= 100)
+          );
+        }*/
+      });
+      return () => {
+        unsubscribe();
+      };
+    }
+  }, [chipData]);
 
   const addtoFilter = (chipToAdd: ChipData) => () => {
     setChipData(chips =>
