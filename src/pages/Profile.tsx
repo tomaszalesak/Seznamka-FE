@@ -10,11 +10,17 @@ import {
   ImageListItem
 } from '@mui/material';
 import { useParams } from 'react-router-dom';
-import { getDoc, setDoc } from 'firebase/firestore';
+import { deleteDoc, getDoc, setDoc } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 
 import { useUser } from '../hooks/useLoggedInUser';
-import { User, userBlockedDocument, userFollowDocument, usersDocument } from '../utils/firebase';
+import {
+  chatsDocument,
+  User,
+  userBlockedDocument,
+  userFollowDocument,
+  usersDocument
+} from '../utils/firebase';
 import useProfilePicture from '../hooks/useProfilePicture';
 
 const itemData = [
@@ -115,6 +121,14 @@ const Profile = () => {
         first_name: profile?.first_name,
         last_name: profile?.last_name
       });
+
+      const q1 = await getDoc(chatsDocument(`${user?.email}${profileId}`));
+      const q2 = await getDoc(chatsDocument(`${profileId}${user?.email}`));
+      if (!q1.exists() && !q2.exists())
+        await setDoc(chatsDocument(`${user?.email}${profileId}`), {
+          user1: user?.email,
+          user2: profileId
+        });
       setFollow(true);
     }
   };
@@ -126,6 +140,16 @@ const Profile = () => {
         first_name: profile?.first_name,
         last_name: profile?.last_name
       });
+
+      const q1 = await getDoc(chatsDocument(`${user?.email}${profileId}`));
+      const q2 = await getDoc(chatsDocument(`${profileId}${user?.email}`));
+      if (q1.exists()) {
+        await deleteDoc(chatsDocument(`${user?.email}${profileId}`));
+      }
+      if (q2.exists()) {
+        await deleteDoc(chatsDocument(`${profileId}${user?.email}`));
+      }
+
       setBlocked(true);
     }
   };
