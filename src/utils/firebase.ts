@@ -66,7 +66,7 @@ export type User = {
     min_weight: number;
     max_weight: number;
   };
-  //follow: string[];
+  follow?: string[];
   //blocked: string[];
 };
 

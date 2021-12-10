@@ -22,7 +22,8 @@ const notLoginPages = [{ name: 'Home', link: '/' }];
 const loginPages = [
   { name: 'Home', link: '/' },
   { name: 'Find', link: '/find' },
-  { name: 'Chats', link: '/chats' }
+  { name: 'Chats', link: '/chats' },
+  { name: 'Following', link: '/following' }
 ];
 
 const Layout: FC = ({ children }) => {
