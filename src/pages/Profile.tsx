@@ -21,6 +21,7 @@ import {
   userFollowDocument,
   usersDocument
 } from '../utils/firebase';
+import useProfilePicture from '../hooks/useProfilePicture';
 
 const itemData = [
   {
@@ -82,7 +83,7 @@ const Profile = () => {
   const [follow, setFollow] = useState<boolean>();
 
   useEffect(() => {
-    (async () => {
+    const getProfile = async () => {
       if (profileId && user?.email) {
         const followDoc = await getDoc(userFollowDocument(user?.email, profileId));
         const blockedDoc = await getDoc(userBlockedDocument(profileId, user?.email));
@@ -109,7 +110,8 @@ const Profile = () => {
           console.log('No such document!');
         }
       }
-    })();
+    };
+    getProfile();
   }, [user, profileId]);
 
   const followHandler = async () => {
@@ -152,6 +154,8 @@ const Profile = () => {
     }
   };
 
+  const photo = useProfilePicture(profile?.photo);
+
   return (
     <Grid container spacing={4}>
       <Grid item xs={12} sm={6} md={4}>
@@ -179,7 +183,7 @@ const Profile = () => {
               ''
             )}
           </CardActions>
-          <CardMedia component="img" image="https://source.unsplash.com/random" alt="random" />
+          <CardMedia component="img" image={photo} alt="random" />
           <CardContent>
             <Typography gutterBottom variant="h5" component="div">
               {profile ? `${profile?.first_name} ${profile?.last_name}` : ''}
