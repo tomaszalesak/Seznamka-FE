@@ -12,16 +12,10 @@ import {
 import { useParams } from 'react-router-dom';
 import { getDoc, setDoc } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
-import { getDownloadURL, ref } from 'firebase/storage';
 
 import { useUser } from '../hooks/useLoggedInUser';
-import {
-  storage,
-  User,
-  userBlockedDocument,
-  userFollowDocument,
-  usersDocument
-} from '../utils/firebase';
+import { User, userBlockedDocument, userFollowDocument, usersDocument } from '../utils/firebase';
+import useProfilePicture from '../hooks/useProfilePicture';
 
 const itemData = [
   {
@@ -81,7 +75,6 @@ const Profile = () => {
   const [profile, setProfile] = useState<User>();
   const [blocked, setBlocked] = useState<boolean>();
   const [follow, setFollow] = useState<boolean>();
-  const [photo, setPhoto] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     const getProfile = async () => {
@@ -115,15 +108,6 @@ const Profile = () => {
     getProfile();
   }, [user, profileId]);
 
-  useEffect(() => {
-    const fetchImage = async () => {
-      const pathReference = ref(storage, `images/${profile?.photo}`);
-      const url = await getDownloadURL(pathReference);
-      setPhoto(url);
-    };
-    fetchImage();
-  }, [profile]);
-
   const followHandler = async () => {
     if (user?.email && profileId) {
       await setDoc(userFollowDocument(user?.email, profileId), {
@@ -145,6 +129,8 @@ const Profile = () => {
       setBlocked(true);
     }
   };
+
+  const photo = useProfilePicture(profile?.photo);
 
   return (
     <Grid container spacing={4}>
@@ -173,14 +159,7 @@ const Profile = () => {
               ''
             )}
           </CardActions>
-          <CardMedia
-            component="img"
-            image={
-              photo ??
-              'https://www.anchormortgagellc.com/wp-content/uploads/2015/09/placeholder.png'
-            }
-            alt="random"
-          />
+          <CardMedia component="img" image={photo} alt="random" />
           <CardContent>
             <Typography gutterBottom variant="h5" component="div">
               {profile ? `${profile?.first_name} ${profile?.last_name}` : ''}
