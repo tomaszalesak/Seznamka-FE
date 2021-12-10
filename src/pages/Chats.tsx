@@ -12,14 +12,74 @@ import {
   TextField
 } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { addDoc, onSnapshot, orderBy, query } from 'firebase/firestore';
+
+import { chatMessagesCollection, chatsCollection, ChatWithEmail, Message } from '../utils/firebase';
+import { useUser } from '../hooks/useLoggedInUser';
 
 const Chats = () => {
-  const [selectedIndex, setSelectedIndex] = useState(1);
+  const loggedInUser = useUser();
+  const [selectedChat, setSelectedChat] = useState('');
 
-  const handleListItemClick = (index: number) => {
-    setSelectedIndex(index);
+  const [chats, setChats] = useState<ChatWithEmail[]>([]);
+
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [fieldValue, setFieldValue] = useState('');
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setFieldValue(event.target.value);
   };
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(chatsCollection, snapshot => {
+      const result = snapshot.docs
+        .filter(
+          chat =>
+            chat.data().user1 === loggedInUser?.email || chat.data().user2 === loggedInUser?.email
+        )
+        .map(doc => {
+          const secondUser =
+            loggedInUser?.email === doc.data().user1 ? doc.data().user2 : doc.data().user1;
+          return { email: secondUser, id: doc.id, ...doc.data() };
+        });
+      setChats(result);
+    });
+    return () => {
+      unsubscribe();
+    };
+  }, [loggedInUser]);
+
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    let unsubscribe = () => {};
+    if (selectedChat !== '') {
+      const q = query(chatMessagesCollection(selectedChat), orderBy('createdAt'));
+      unsubscribe = onSnapshot(q, snapshot => {
+        const result = snapshot.docs.map(doc => doc.data());
+        setMessages(result);
+      });
+    }
+    return () => {
+      unsubscribe();
+    };
+  }, [selectedChat]);
+
+  const handleListItemClick = (index: string) => {
+    setSelectedChat(index);
+  };
+
+  const addMessage = async () => {
+    if (selectedChat !== '')
+      await addDoc(chatMessagesCollection(selectedChat), {
+        createdAt: new Date(),
+        time: new Date().toJSON().slice(0, 10).split('-').reverse().join('.'),
+        author: loggedInUser?.email,
+        message: fieldValue
+      });
+    setFieldValue('');
+  };
+
   return (
     <Grid container component={Paper} spacing={2} sx={{ height: '92vh' }}>
       <Grid item xs={4}>
@@ -32,16 +92,16 @@ const Chats = () => {
           component="nav"
           aria-label="main mailbox folders"
         >
-          {[...Array(100).keys()].map(item => (
+          {chats.map(item => (
             <ListItemButton
-              key={item}
-              selected={selectedIndex === item}
-              onClick={() => handleListItemClick(item)}
+              key={item.id}
+              selected={selectedChat === item.id}
+              onClick={() => handleListItemClick(item.id)}
             >
               <ListItemAvatar>
                 <Avatar>N</Avatar>
               </ListItemAvatar>
-              <ListItemText primary="Inbox" />
+              <ListItemText>{item.email}</ListItemText>
             </ListItemButton>
           ))}
         </List>
@@ -54,50 +114,39 @@ const Chats = () => {
             height: '80vh'
           }}
         >
-          <ListItem key="1">
-            <Grid container>
-              <Grid item xs={12}>
-                <ListItemText sx={{ textAlign: 'right' }} primary="Hey man, What's up ?" />
+          {messages.map((item, index) => (
+            <ListItem key={index}>
+              <Grid container>
+                <Grid item xs={12}>
+                  <ListItemText
+                    sx={{ textAlign: loggedInUser?.email === item.author ? 'right' : 'left' }}
+                    primary={item.message}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ListItemText
+                    sx={{ textAlign: loggedInUser?.email === item.author ? 'right' : 'left' }}
+                    secondary={item.time}
+                  />
+                </Grid>
               </Grid>
-              <Grid item xs={12}>
-                <ListItemText sx={{ textAlign: 'right' }} secondary="09:30" />
-              </Grid>
-            </Grid>
-          </ListItem>
-          <ListItem key="2">
-            <Grid container>
-              <Grid item xs={12}>
-                <ListItemText
-                  sx={{ textAlign: 'left' }}
-                  primary="Hey, Iam Good! What about you ?"
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <ListItemText sx={{ textAlign: 'left' }} secondary="09:31" />
-              </Grid>
-            </Grid>
-          </ListItem>
-          <ListItem key="3">
-            <Grid container>
-              <Grid item xs={12}>
-                <ListItemText
-                  sx={{ textAlign: 'right' }}
-                  primary="Cool. i am good, let's catch up!"
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <ListItemText sx={{ textAlign: 'right' }} secondary="10:30" />
-              </Grid>
-            </Grid>
-          </ListItem>
+            </ListItem>
+          ))}
         </List>
         <Divider />
         <Grid container>
           <Grid item xs={11}>
-            <TextField id="outlined-basic-email" label="Type Something" size="small" fullWidth />
+            <TextField
+              id="outlined-basic-email"
+              label="Type Something"
+              size="small"
+              value={fieldValue}
+              onChange={handleChange}
+              fullWidth
+            />
           </Grid>
-          <Grid xs={1} sx={{ textAlign: 'right' }}>
-            <Fab color="primary" aria-label="add" size="small">
+          <Grid item xs={1} sx={{ textAlign: 'right' }}>
+            <Fab color="primary" aria-label="add" size="small" onClick={addMessage}>
               <SendIcon />
             </Fab>
           </Grid>

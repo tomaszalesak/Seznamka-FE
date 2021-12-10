@@ -84,6 +84,20 @@ export type Blocked = {
   last_name: string;
 };
 
+export type Message = {
+  createdAt: Date;
+  time: string;
+  author: string;
+  message: string;
+};
+
+export type Chat = {
+  user1: string;
+  user2: string;
+};
+
+export type ChatWithEmail = Chat & { email: string; id: string };
+
 export const usersCollection = collection(db, 'users') as CollectionReference<User>;
 
 export const usersDocument = (id: string) => doc(db, 'users', id) as DocumentReference<User>;
@@ -95,3 +109,11 @@ export const userFollowDocument = (idUser: string, idFollow: string) =>
 
 export const userBlockedDocument = (idUser: string, idFollow: string) =>
   doc(db, 'users', idUser, 'blocked', idFollow) as DocumentReference<Blocked>;
+
+export const chatsCollection = collection(db, 'chats') as CollectionReference<Chat>;
+
+export const chatMessagesCollection = (idChat: string) =>
+  collection(db, 'chats', idChat, 'messages') as CollectionReference<Message>;
+
+export const chatsDocument = (idChat: string) =>
+  doc(db, 'chats', idChat) as DocumentReference<Chat>;
