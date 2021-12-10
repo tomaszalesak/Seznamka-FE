@@ -12,17 +12,6 @@ type ChipData = {
   used: boolean;
 };
 
-/*type Preferences = {
-  minAge: number;
-  maxAge: number;
-  minRad: number;
-  maxRad: number;
-  minHeight: number;
-  maxHeight: number;
-  minWeight: number;
-  maxWeight: number;
-};*/
-
 const Find = () => {
   const loggedInUser = useUser();
   const [users, setUsers] = useState<UserWithId[]>([]);
