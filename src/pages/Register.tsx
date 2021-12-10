@@ -174,7 +174,7 @@ const Register = () => {
         <Typography variant="h4" component="h2" textAlign="center" mb={3}>
           Register
         </Typography>
-        <TextField label="Username" {...usernameProps} type="input" />
+        <TextField label="Username" {...usernameProps} type="email" />
         <TextField label="Password" {...passwordProps} type="password" />
         <Divider />
         <Typography variant="h6" component="h6" textAlign="left" mb={3}>
