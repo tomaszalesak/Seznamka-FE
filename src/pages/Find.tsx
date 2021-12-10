@@ -1,9 +1,10 @@
 import { Grid, Chip } from '@mui/material';
-import { onSnapshot } from 'firebase/firestore';
+import { onSnapshot, getDoc } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 
 import FindCard from '../components/FindCard';
-import { usersCollection, UserWithId } from '../utils/firebase';
+import { User, usersCollection, UserWithId, usersDocument } from '../utils/firebase';
+import { useUser } from '../hooks/useLoggedInUser';
 
 type ChipData = {
   key: number;
@@ -13,6 +14,18 @@ type ChipData = {
 
 const Find = () => {
   const [users, setUsers] = useState<UserWithId[]>([]);
+  const [profile, setProfile] = useState<User>();
+  const user = useUser();
+
+  useEffect(() => {
+    (async () => {
+      if (user?.email) {
+        const userDoc = usersDocument(user.email);
+        const uDoc = await getDoc(userDoc);
+        setProfile(uDoc.data());
+      }
+    })();
+  }, []);
 
   useEffect(() => {
     // Call onSnapshot() to listen to changes
@@ -27,17 +40,16 @@ const Find = () => {
   }, []);
 
   const [chipData, setChipData] = useState<readonly ChipData[]>([
-    { key: 0, label: 'Angular', used: true },
-    { key: 1, label: 'jQuery', used: true },
-    { key: 2, label: 'Polymer', used: true },
-    { key: 3, label: 'React', used: true },
-    { key: 4, label: 'Vue.js', used: true }
+    { key: 0, label: 'Age', used: false },
+    { key: 1, label: 'Height', used: false },
+    { key: 2, label: 'Weight', used: false },
+    { key: 3, label: 'GPS radius', used: false }
   ]);
 
-  const addtoFilter = (chipToDelete: ChipData) => () => {
+  const addtoFilter = (chipToAdd: ChipData) => () => {
     setChipData(chips =>
       chips.map(chip => {
-        if (chip.key === chipToDelete.key) {
+        if (chip.key === chipToAdd.key) {
           chip.used = true;
           return chip;
         }
