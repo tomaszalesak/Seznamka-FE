@@ -1,9 +1,15 @@
 import { Grid } from '@mui/material';
-import { onSnapshot, getDoc } from 'firebase/firestore';
+import { onSnapshot, getDoc, getDocs } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 
 import FindCard from '../components/FindCard';
-import { User, usersCollection, UserWithId, usersDocument } from '../utils/firebase';
+import {
+  User,
+  usersCollection,
+  UserWithId,
+  usersDocument,
+  userFollowCollection
+} from '../utils/firebase';
 import { useUser } from '../hooks/useLoggedInUser';
 
 const Following = () => {
@@ -23,16 +29,23 @@ const Following = () => {
   }, []);
 
   useEffect(() => {
+    const follow: string[] = [];
+    (async () => {
+      const findDocs = await getDocs(userFollowCollection(loggedInUser?.email as string));
+      findDocs.forEach(doc => {
+        // doc.data() is never undefined for query doc snapshots
+        console.log(doc.id, ' => ', doc.data());
+        follow.push(doc.id);
+      });
+    })();
+
     // Call onSnapshot() to listen to changes
     const unsubscribe = onSnapshot(usersCollection, snapshot => {
       // Access .docs property of snapshot
-      /*const findDoc = (doc: QueryDocumentSnapshot<User>) =>
-        userFollowDocument(loggedInUser?.email as string, doc.id);*/
       setUsers(
         snapshot.docs
           .filter(doc => doc.id !== loggedInUser?.email)
-          //.filter(doc => profile?.follow?.find((e: string) => e === doc.id))
-          //.filter(doc => doc.id === findDoc(doc).id.)
+          .filter(doc => follow.find((e: string) => e === doc.id))
           .map(doc => ({ id: doc.id, ...doc.data() }))
       );
     });

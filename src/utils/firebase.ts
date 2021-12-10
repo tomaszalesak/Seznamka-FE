@@ -107,6 +107,9 @@ export const storage = getStorage(firebaseApp);
 export const userFollowDocument = (idUser: string, idFollow: string) =>
   doc(db, 'users', idUser, 'follow', idFollow) as DocumentReference<Follow>;
 
+export const userFollowCollection = (idUser: string) =>
+  collection(db, 'users', idUser, 'follow') as CollectionReference<Follow>;
+
 export const userBlockedDocument = (idUser: string, idFollow: string) =>
   doc(db, 'users', idUser, 'blocked', idFollow) as DocumentReference<Blocked>;
 
