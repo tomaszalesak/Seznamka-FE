@@ -26,14 +26,13 @@ const Following = () => {
     // Call onSnapshot() to listen to changes
     const unsubscribe = onSnapshot(usersCollection, snapshot => {
       // Access .docs property of snapshot
+      /*const findDoc = (doc: QueryDocumentSnapshot<User>) =>
+        userFollowDocument(loggedInUser?.email as string, doc.id);*/
       setUsers(
         snapshot.docs
           .filter(doc => doc.id !== loggedInUser?.email)
-          .map(doc => ({ id: doc.id, ...doc.data() }))
-      );
-      setUsers(
-        snapshot.docs
-          .filter(doc => profile?.follow?.find((e: string) => e === doc.id))
+          //.filter(doc => profile?.follow?.find((e: string) => e === doc.id))
+          //.filter(doc => doc.id === findDoc(doc).id.)
           .map(doc => ({ id: doc.id, ...doc.data() }))
       );
     });
