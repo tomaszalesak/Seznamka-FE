@@ -8,26 +8,15 @@ import {
   Button,
   Grid
 } from '@mui/material';
-import { FC, useEffect, useState } from 'react';
+import { FC } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getDownloadURL, ref } from 'firebase/storage';
 
-import { UserWithId, storage } from '../utils/firebase';
+import useProfilePicture from '../hooks/useProfilePicture';
+import { UserWithId } from '../utils/firebase';
 
 const FindCard: FC<UserWithId> = ({ first_name, last_name, bio, id, photo }) => {
+  const profilePhoto = useProfilePicture(photo);
   const navigate = useNavigate();
-
-  const [myPhoto, setPhoto] = useState<string | undefined>(undefined);
-
-  useEffect(() => {
-    const fetchImage = async () => {
-      const pathReference = ref(storage, `images/${photo}`);
-      const url = await getDownloadURL(pathReference);
-      setPhoto(url);
-    };
-    fetchImage();
-  }, []);
-
   return (
     <Grid item xs={12} sm={6} md={4}>
       <Card>
@@ -35,14 +24,7 @@ const FindCard: FC<UserWithId> = ({ first_name, last_name, bio, id, photo }) => 
           <CardHeader title={`${first_name} ${last_name}`} />
         </Button>
 
-        <CardMedia
-          component="img"
-          image={
-            myPhoto ??
-            'https://www.anchormortgagellc.com/wp-content/uploads/2015/09/placeholder.png'
-          }
-          alt="random"
-        />
+        <CardMedia component="img" image={profilePhoto} alt="random" />
         <CardContent sx={{ flexGrow: 1 }}>
           <Typography>{bio}</Typography>
         </CardContent>
