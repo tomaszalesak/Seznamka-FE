@@ -1,5 +1,5 @@
 import { FC, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   AppBar,
   Container,
@@ -26,6 +26,7 @@ const loginPages = [
 ];
 
 const Layout: FC = ({ children }) => {
+  const navigate = useNavigate();
   const user = useUser();
   const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
   const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
@@ -182,6 +183,7 @@ const Layout: FC = ({ children }) => {
                     onClick={() => {
                       handleCloseNavMenu();
                       signOut();
+                      navigate('/login');
                     }}
                   >
                     <Typography textAlign="center">Sign out</Typography>

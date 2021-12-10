@@ -13,6 +13,7 @@ type ChipData = {
 };
 
 const Find = () => {
+  const loggedInUser = useUser();
   const [users, setUsers] = useState<UserWithId[]>([]);
   const [profile, setProfile] = useState<User>();
   const user = useUser();
@@ -31,13 +32,17 @@ const Find = () => {
     // Call onSnapshot() to listen to changes
     const unsubscribe = onSnapshot(usersCollection, snapshot => {
       // Access .docs property of snapshot
-      setUsers(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      setUsers(
+        snapshot.docs
+          .filter(doc => doc.id !== loggedInUser?.email)
+          .map(doc => ({ id: doc.id, ...doc.data() }))
+      );
     });
     // Don't forget to unsubscribe from listening to changes
     return () => {
       unsubscribe();
     };
-  }, []);
+  }, [loggedInUser]);
 
   const [chipData, setChipData] = useState<readonly ChipData[]>([
     { key: 0, label: 'Age', used: false },
